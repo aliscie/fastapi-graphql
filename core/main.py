@@ -2,6 +2,9 @@ import importlib
 from ariadne import make_executable_schema, load_schema_from_path
 from ariadne.asgi import GraphQL
 from broadcaster import Broadcast
+from icecream import ic
+
+from core.MiddleWare.Authenticate import authenticate
 from core.MiddleWare.Pagination import pagination
 from core.MiddleWare.SearchAndFiltering import serach
 from core.settings import APPS, origins
@@ -21,10 +24,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 broadcast = Broadcast("redis://redis:6379")
 # broadcast = Broadcast("redis://localhost:6379")
-
 
 
 meta = MetaData()
@@ -58,9 +59,24 @@ for i in APPS:
         pass
     types.extend(x.types)
 
-middleware = [pagination, serach]
+middleware = [pagination, serach, authenticate]
 schema = make_executable_schema(type_defs, *types)
 
-ariadneApp = GraphQL(schema, debug=True, middleware=middleware)
+from ariadne.types import Extension
+
+
+class QueryExecutionTimeExtension(Extension):
+    def __init__(self):
+        self.start_timestamp = None
+        self.end_timestamp = None
+
+    def request_started(self, context):
+        self.start_timestamp = ''
+
+    def request_finished(self, context):
+        self.end_timestamp = '1'
+
+
+ariadneApp = GraphQL(schema, debug=True, middleware=middleware, extensions=[QueryExecutionTimeExtension])
 app.mount("/", ariadneApp)
 app.mount("/admin", admin_app)

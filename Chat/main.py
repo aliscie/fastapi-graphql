@@ -1,17 +1,16 @@
 import asyncio
-import datetime
 import json
-import os
+from typing import Any, AsyncGenerator
 
-import pytz
+from ariadne import MutationType
 from ariadne import SubscriptionType, QueryType
-from celery_sqlalchemy_scheduler.models import PeriodicTask, IntervalSchedule
 from celery_sqlalchemy_scheduler.session import SessionManager
+from graphql import GraphQLResolveInfo
 from icecream import ic
-from tortoise.timezone import now
 
-from celery_worker import celery_app
-from db_conf import db_session, beat_dburi
+from core.main import broadcast
+from db_conf import beat_dburi
+from db_conf import db_session
 
 session_manager = SessionManager()
 engine, Session = session_manager.create_session(beat_dburi)
@@ -20,32 +19,21 @@ session = Session()
 query = QueryType()
 subscription = SubscriptionType()
 db = db_session.session_factory()
-
-
-# if not schedule:
-#     schedule = IntervalSchedule(every=10, period=IntervalSchedule.SECONDS)
-#     db.add(schedule)
-#     db.commit()
-
-
-# class AuthenticationError(Exception):
-#     extensions = {"code": "UNAUTHENTICATED"}
-#
-#
-# type_def = """
-#     type Query {
-#         field: Boolean
-#     }
-# """
-#
-# query_type = QueryType()
+mutation = MutationType()
+sub2 = SubscriptionType()
 
 
 @query.field("hello")
 def __init__(*args, **kwargs):
     # raise AuthenticationError("PLEASE LOGIN")
-    ic('xxxx')
     return "xxxxxxx"
+
+
+@mutation.field("send")
+async def __init__(info ,*args, **kwargs):
+    number = kwargs.get('number')
+    await broadcast.publish(channel="chatroom", message=json.dumps({'message': number, "sender": 1}))
+    return number
 
 
 @subscription.source("counter")
@@ -56,50 +44,25 @@ async def __init__(obj, info):
 
 
 @subscription.field("counter")
-def __init__(count, info):
-    if count == 0:
-        ic('xxx')
-        # from redisbeat.scheduler import RedisScheduler
-        # schduler = RedisScheduler(app=celery_app)
-        # schduler.add(**{
-        #     'name': 'my new task',
-        #     'task': 'My_new_task',
-        #     'schedule': datetime.timedelta(seconds=3),
-        #     'args': (1, 1,1)
-        # })
+def __init__(count, info, *args, **kwargs):
+    # request = info.context.get('request')
+    # from urllib.parse import urlparse, parse_qs
+    # parsed_url = urlparse(f"?{request.scope['query_string'].decode('utf-8')}")
+    # token =  parse_qs(parsed_url.query)['token'][0]
 
-        # 1. delete all
-        # session.query(PeriodicTask).filter().delete()
-        # session.query(IntervalSchedule).filter().delete()
-
-        # 2. add new task
-        data = {
-            "every": 1,
-            'period': IntervalSchedule.SECONDS
-        }
-        # schedule = IntervalSchedule(**data)
-        # session.add(schedule)
-        schedule = session.query(IntervalSchedule).filter(IntervalSchedule.every==1).first()
-        periodic_task = session.query(PeriodicTask).filter(PeriodicTask.id == 10).first()
-
-        # periodic_task = PeriodicTask(
-        #     start_time=now() + datetime.timedelta(seconds=3),
-        #     expires=now() + datetime.timedelta(days=10),
-        #     name='My task',  # simply describes this periodic task.
-        #     task='My_new_task',  # name of task.
-        #     args=json.dumps([1,1,1]))
-        # periodic_task.interval = schedule
-        # periodic_task.start_time = now() + datetime.timedelta(seconds=3)
-        # periodic_task.expires = now() + datetime.timedelta(days=10)
-        # periodic_task.total_run_count = 3
-        periodic_task.task = 'My_new_task'
-        periodic_task.args = json.dumps([1,1,1])
-        periodic_task.one_off = True
-        periodic_task.enabled = False
-        # session.add(periodic_task)
-        session.commit()
-
-    return count * 100
+    return count
 
 
-types = [query, subscription]
+@sub2.source("chat")
+async def counter_generator(_: Any, info: GraphQLResolveInfo) -> AsyncGenerator[str, None]:
+    async with broadcast.subscribe(channel="chatroom") as subscriber:
+        async for event in subscriber:
+            yield json.loads(event.message)
+
+
+@sub2.field("chat")
+def counter_resolver(count, info):
+    return count
+
+
+types = [sub2,mutation,  query, subscription]

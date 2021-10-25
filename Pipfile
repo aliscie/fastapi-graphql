@@ -68,6 +68,9 @@ celery = "*"
 celery-sqlalchemy-scheduler = "*"
 fastapi-admin = "*"
 redisbeat = "*"
+passlib = "*"
+python-jose = "*"
+fastapi-auth0 = "*"
 
 [dev-packages]
 

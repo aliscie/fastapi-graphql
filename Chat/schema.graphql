@@ -3,6 +3,10 @@ hello: String!
 }
 
 
+extend type Mutation {
+    send(number: String!): String
+}
+
 extend type Subscription {
 """
 - This returns `1, 2, 3, 4,`

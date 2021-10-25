@@ -37,11 +37,11 @@ def My_new_task(a, b, c):
     print(b + c)
     return b + c
 
-
-celery_app.conf.beat_schedule = {
-    'add-every-30-seconds': {
-        'task': 'My_new_task',
-        'schedule': 3,
-        'args': (1, 2, 2)
-    },
-}
+#
+# celery_app.conf.beat_schedule = {
+#     'add-every-30-seconds': {
+#         'task': 'My_new_task',
+#         'schedule': 3,
+#         'args': (1, 2, 2)
+#     },
+# }

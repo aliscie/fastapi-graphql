@@ -1,6 +1,7 @@
 import asyncio
 
 from ariadne import QueryType
+from icecream import ic
 
 from Users import models
 from Users.auth import mutation
@@ -17,7 +18,8 @@ def send_auth_email(user):
 
 
 @users_query.field("users")
-def __init__(*args, **kwargs):
+def __init__(_,info, *args, **kwargs):
+    user = info.context.get('user')
     return db.query(models.User).all()
 
 

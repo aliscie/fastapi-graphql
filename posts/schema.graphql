@@ -6,7 +6,6 @@ chat: Message
 }
 
 extend type Mutation {
-    send(number: String!): String!
     post(title: String!, content: String!): Boolean!
 }
 type Message {
