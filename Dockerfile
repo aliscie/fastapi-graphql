@@ -1,6 +1,6 @@
 FROM python:3
 ENV PYTHONUNBUFFERED=1
-WORKDIR /app
+WORKDIR /web
 COPY . .
 #for psycopg2
 RUN apt-get update && apt-get clean all && rm -rf /var/lib/apt/lists/*

@@ -5,5 +5,5 @@ build:
     DEBUG_COLLECTSTATIC: 1
     SECRET_KEY: build
 release:
-  image: app
+  image: web
   command: bash -c "alembic upgrade head && uvicorn core.main:app --host 0.0.0.0 --port 8000 --reload"
