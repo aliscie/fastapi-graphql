@@ -16,8 +16,8 @@ init_db:
 	alembic init alembic
 
 migrate:
-	docker-compose run app alembic upgrade head
-	docker-compose run app alembic revision --autogenerate -m "New Migration"
+	docker-compose run web alembic upgrade head
+	docker-compose run web alembic revision --autogenerate -m "New Migration"
 
 makemigratoins:
 	alembic revision -m 'init'
