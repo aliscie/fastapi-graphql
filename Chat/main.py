@@ -8,6 +8,7 @@ from celery_sqlalchemy_scheduler.session import SessionManager
 from graphql import GraphQLResolveInfo
 from icecream import ic
 
+from Functions.oauth import oauth
 from core.main import broadcast
 from db_conf import beat_dburi
 from db_conf import db_session
@@ -32,7 +33,13 @@ def __init__(*args, **kwargs):
 @mutation.field("send")
 async def __init__(info ,*args, **kwargs):
     number = kwargs.get('number')
-    await broadcast.publish(channel="chatroom", message=json.dumps({'message': number, "sender": 1}))
+    ic(oauth(number))
+    user = kwargs.get('user')
+    if hasattr(user, 'username'):
+        username = user.username
+    else:
+        username = 'anonymous'
+    await broadcast.publish(channel="chatroom", message=json.dumps({'message': number, "sender":username }))
     return number
 
 

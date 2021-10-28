@@ -1,4 +1,5 @@
 extend type Mutation {
     signup(username: String!, password: String!, birth_date: String, email: String): Boolean
     signin(username: String!, password: String!): String
+    google_auth(token: String!): String
 }

@@ -2,12 +2,12 @@ from datetime import timedelta
 
 import bcrypt
 from ariadne import MutationType
-from icecream import ic
 
 from Users import models
-from core.jwt_token import create_access_token, decode_access_token
+from core.jwt_token import create_access_token
 from db_conf import db_session
 
+access_token_expires = timedelta(minutes=60)
 db = db_session.session_factory()
 
 mutation = MutationType()
@@ -25,7 +25,7 @@ class DuplicateError(Exception):
 def __init__(*args, **kwargs):
     username = kwargs.get('username')
     password = kwargs.get('password')
-    access_token_expires = timedelta(minutes=60)
+
 
     db_user_info = db.query(models.User).filter(models.User.username == username).first()
     if not db_user_info:
@@ -37,6 +37,22 @@ def __init__(*args, **kwargs):
         return access_token
     else:
         return AuthenticationError("invalid credentials.")
+
+
+@mutation.field("google_auth")
+def __init__(*args, **kwargs):
+    token = kwargs.get('token')
+    from Functions.oauth import oauth
+    user = None
+    try:
+        user, created = oauth(token)
+    except Exception as e:
+        return 'Invalid token'
+    if user:
+        access_token = create_access_token(data={"user": user.username}, expires_delta=access_token_expires)
+        return access_token
+    else:
+        return False
 
 
 @mutation.field("signup")

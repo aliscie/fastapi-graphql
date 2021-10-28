@@ -1,5 +1,3 @@
-from icecream import ic
-
 from Users import models
 from core.jwt_token import decode_access_token
 from db_conf import db_session
@@ -15,7 +13,7 @@ def authenticate(resolver, obj, info, **args):
         try:
             payload = decode_access_token(data=authorization.replace('Bearer ', ''))
             user = db.query(models.User).filter(models.User.username == payload.get('user')).first()
-            info.context['user'] = user
+            args['user'] = user
         except:
             pass
 
