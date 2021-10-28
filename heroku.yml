@@ -6,4 +6,5 @@ build:
     SECRET_KEY: build
 release:
   image: web
-  command: bash -c "alembic upgrade head && uvicorn core.main:app --host 0.0.0.0 --port 8000 --reload"
+  command:  alembic upgrade head && uvicorn core.main:app --host 0.0.0.0 --port 8000 --reload
+#  command: bash -c "alembic upgrade head && uvicorn core.main:app --host 0.0.0.0 --port 8000 --reload"
