@@ -11,7 +11,7 @@ def authenticate(resolver, obj, info, **args):
     if request:
         authorization = request._headers.get('authorization')
         try:
-            payload = decode_access_token(data=authorization.replace('Bearer ', ''))
+            payload = decode_access_token(data=authorization)
             user = db.query(models.User).filter(models.User.username == payload.get('user')).first()
             info.context['user'] = user
         except:
