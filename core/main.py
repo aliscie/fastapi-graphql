@@ -1,14 +1,18 @@
 import importlib
+from typing import Any
+
 from ariadne import make_executable_schema, load_schema_from_path
 from ariadne.asgi import GraphQL
 from broadcaster import Broadcast
 from icecream import ic
 
+from Users import models
 from core.MiddleWare.Authenticate import authenticate
 from core.MiddleWare.Pagination import pagination
 from core.MiddleWare.SearchAndFiltering import serach
+from core.jwt_token import decode_access_token
 from core.settings import APPS, origins
-from db_conf import engine
+from db_conf import engine, db_session
 from fastapi_admin.app import app as admin_app
 from fastapi import FastAPI
 import contextlib
@@ -77,6 +81,28 @@ class QueryExecutionTimeExtension(Extension):
         self.end_timestamp = '1'
 
 
-ariadneApp = GraphQL(schema, debug=True, middleware=middleware, extensions=[QueryExecutionTimeExtension])
+db = db_session.session_factory()
+
+
+def context_value(request, *args, **kwargs):
+    from urllib.parse import urlparse, parse_qs
+    URL = str(request.url)
+    parsed_url = urlparse(URL)
+    query_string = parse_qs(parsed_url.query)
+    token = query_string.get('token')
+    context = {}
+    if token:
+        token = token[0]
+        try:
+            payload = decode_access_token(data=token)
+            user = db.query(models.User).filter(models.User.username == payload.get('user')).first()
+            context['user'] = user
+        except Exception as e:
+            ic(e)
+    return context
+
+
+ariadneApp = GraphQL(schema, context_value=context_value, debug=True, middleware=middleware,
+                     extensions=[QueryExecutionTimeExtension])
 app.mount("/", ariadneApp)
 app.mount("/admin", admin_app)

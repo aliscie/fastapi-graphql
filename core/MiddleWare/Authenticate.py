@@ -13,7 +13,7 @@ def authenticate(resolver, obj, info, **args):
         try:
             payload = decode_access_token(data=authorization.replace('Bearer ', ''))
             user = db.query(models.User).filter(models.User.username == payload.get('user')).first()
-            args['user'] = user
+            info.context['user'] = user
         except:
             pass
 

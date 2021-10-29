@@ -8,7 +8,6 @@ from celery_sqlalchemy_scheduler.session import SessionManager
 from graphql import GraphQLResolveInfo
 from icecream import ic
 
-from Functions.oauth import oauth
 from core.main import broadcast
 from db_conf import beat_dburi
 from db_conf import db_session
@@ -31,10 +30,9 @@ def __init__(*args, **kwargs):
 
 
 @mutation.field("send")
-async def __init__(info ,*args, **kwargs):
+async def __init__(obj, info ,*args, **kwargs):
     number = kwargs.get('number')
-    ic(oauth(number))
-    user = kwargs.get('user')
+    user = info.context.get('user')
     if hasattr(user, 'username'):
         username = user.username
     else:

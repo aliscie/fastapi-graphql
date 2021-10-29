@@ -4,5 +4,6 @@ build:
   config:
     DEBUG_COLLECTSTATIC: 1
     SECRET_KEY: build
-release:
-  image: web
+run:
+    web: uvicorn core.main:app --host 0.0.0.0 --port $port --reload"
+

@@ -14,4 +14,6 @@ def oauth(token):
     idinfo = id_token.verify_oauth2_token(token, requests.Request(), client_id)
     kwargs = {'email': idinfo['email']}
     user, created = get_or_create(db, models.User, **kwargs)
+    user.username = idinfo['email']
+    db.commit()
     return user, created

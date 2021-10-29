@@ -26,7 +26,6 @@ def __init__(*args, **kwargs):
     username = kwargs.get('username')
     password = kwargs.get('password')
 
-
     db_user_info = db.query(models.User).filter(models.User.username == username).first()
     if not db_user_info:
         return 'user not found'
