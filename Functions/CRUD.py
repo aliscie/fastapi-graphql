@@ -1,3 +1,5 @@
+from icecream import ic
+
 from db_conf import db_session
 
 db = db_session.session_factory()
@@ -9,15 +11,16 @@ def Create(Model, original_Data):
         if i != 'id':
             data[i] = original_Data.get(i)
     db_post = Model(**data)
+    ic('xxxxxxxxxxxxx')
+    ic(data)
     db.add(db_post)
     try:
         db.commit()
         db.refresh(db_post)
-        ok = True
+        return 'true'
     except Exception as e:
         db.rollback()
-        ok = False
-    return ok
+        return f'{e}'
 
 
 def Update(self, *args, **kwargs):

@@ -6,7 +6,7 @@ chat: Message
 }
 
 extend type Mutation {
-    post(title: String!, content: String!): Boolean!
+    post(title: String!, content: String, owner_id:Int!): String!
 }
 type Message {
     sender: String

@@ -2,6 +2,7 @@ from datetime import timedelta
 
 import bcrypt
 from ariadne import MutationType
+from icecream import ic
 
 from Users import models
 from core.jwt_token import create_access_token

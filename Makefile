@@ -1,7 +1,8 @@
 up:
-	#docker-compose build
-	#docker-compose up -d
 	docker-compose up
+
+build:
+	docker-compose build
 
 down:
 	docker-compose down
@@ -16,6 +17,7 @@ init_db:
 	alembic init alembic
 
 migrate:
+	#alembic revision -m 'init'
 	docker-compose run web alembic upgrade head
 	docker-compose run web alembic revision --autogenerate -m "New Migration"
 

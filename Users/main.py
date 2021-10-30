@@ -2,10 +2,13 @@ import asyncio
 
 from ariadne import QueryType
 from icecream import ic
+from sqlalchemy import inspect
 
 from Users import models
 from Users.auth import mutation
 from db_conf import db_session
+from posts.models import Post
+
 db = db_session.session_factory()
 
 
@@ -19,8 +22,8 @@ def send_auth_email(user):
 
 @users_query.field("users")
 def __init__(_,info, *args, **kwargs):
-    user = info.context.get('user')
-    return db.query(models.User).all()
+    users = db.query(models.User).all()
+    return users
 
 
 types = [mutation, users_query]
