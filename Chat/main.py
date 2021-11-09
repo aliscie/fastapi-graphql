@@ -59,14 +59,14 @@ def __init__(count, info, *args, **kwargs):
 
 
 @sub2.source("chat")
-async def counter_generator(_: Any, info: GraphQLResolveInfo) -> AsyncGenerator[str, None]:
+async def __init__(_: Any, info: GraphQLResolveInfo) -> AsyncGenerator[str, None]:
     async with broadcast.subscribe(channel="chatroom") as subscriber:
         async for event in subscriber:
             yield json.loads(event.message)
 
 
 @sub2.field("chat")
-def counter_resolver(count, info):
+def __init__(count, info):
     return count
 
 

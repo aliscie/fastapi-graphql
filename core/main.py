@@ -1,23 +1,22 @@
+import contextlib
 import importlib
-from typing import Any
 
 from ariadne import make_executable_schema, load_schema_from_path
 from ariadne.asgi import GraphQL
 from broadcaster import Broadcast
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi_admin.app import app as admin_app
 from icecream import ic
+from sqlalchemy import MetaData
 
 from Users import models
-from core.MiddleWare.Authenticate import authenticate
 from core.MiddleWare.Pagination import pagination
 from core.MiddleWare.SearchAndFiltering import serach
 from core.jwt_token import decode_access_token
 from core.settings import APPS, origins
 from db_conf import engine, db_session
-from fastapi_admin.app import app as admin_app
-from fastapi import FastAPI
-import contextlib
-from sqlalchemy import MetaData
-from fastapi.middleware.cors import CORSMiddleware
+from mangum import Mangum
 
 app = FastAPI()
 app.add_middleware(
@@ -63,7 +62,7 @@ for i in APPS:
         pass
     types.extend(x.types)
 
-middleware = [pagination, serach, authenticate]
+middleware = [pagination, serach]
 schema = make_executable_schema(type_defs, *types)
 
 from ariadne.types import Extension
@@ -93,6 +92,15 @@ def context_value(request, *args, **kwargs):
     context = {}
     if token:
         token = token[0]
+
+    try:
+        authorization = request._headers.get('authorization')
+        if not token:
+            token = authorization
+    except:
+        pass
+
+    if token:
         try:
             payload = decode_access_token(data=token)
             user = db.query(models.User).filter(models.User.username == payload.get('user')).first()
@@ -106,3 +114,4 @@ ariadneApp = GraphQL(schema, context_value=context_value, debug=True, middleware
                      extensions=[QueryExecutionTimeExtension])
 app.mount("/", ariadneApp)
 app.mount("/admin", admin_app)
+handler = Mangum(app=app)

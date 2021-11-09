@@ -72,6 +72,7 @@ passlib = "*"
 python-jose = "*"
 fastapi-auth0 = "*"
 google-auth = "*"
+mangum = "*"
 
 [dev-packages]
 

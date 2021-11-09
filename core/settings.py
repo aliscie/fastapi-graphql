@@ -10,6 +10,7 @@ APPS = [
     'Users',
     'Chat',
     'posts',
+    'Collaborate',
 ]
 
 origins = [
