@@ -134,3 +134,7 @@ def test_subscription(test_db, client, get_messages):
         )
         x = get_messages(ws.receive_json, 22)
         printJ(x)
+
+
+def test_fail(test_db, client, get_messages):
+    assert 1 == 2
