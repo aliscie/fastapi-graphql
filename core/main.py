@@ -16,7 +16,6 @@ from core.MiddleWare.SearchAndFiltering import serach
 from core.jwt_token import decode_access_token
 from core.settings import APPS, origins
 from db_conf import engine, db_session
-from mangum import Mangum
 
 app = FastAPI()
 app.add_middleware(
@@ -114,4 +113,3 @@ ariadneApp = GraphQL(schema, context_value=context_value, debug=True, middleware
                      extensions=[QueryExecutionTimeExtension])
 app.mount("/", ariadneApp)
 app.mount("/admin", admin_app)
-handler = Mangum(app=app)
