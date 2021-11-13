@@ -10,7 +10,7 @@ down:
 test:
 	pytest test
 
-run:
+run:1
 	uvicorn core.main:app --reload
 
 init_db:
